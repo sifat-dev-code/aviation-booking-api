@@ -1,7 +1,7 @@
 from database import Base
 from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, ForeignKey
 import datetime
-
+from sqlalchemy.orm import relationship
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key= True, index= True)
@@ -19,6 +19,7 @@ class Flight(Base):
     departure_time = Column(DateTime, nullable= False)
     arrival_time= Column(DateTime, nullable= False)
     base_price = Column(Float, nullable= False)
+    passengers = relationship("Passenger", back_populates="flight")
 class Seat (Base):
     __tablename__ = "seats"
     id = Column(Integer, primary_key= True, index= True)
@@ -35,3 +36,11 @@ class Booking(Base):
     total_price = Column(Float, nullable= False)
     payment_status= Column (String, default= "Pending..")
     booking_time = Column(DateTime, default= datetime.datetime.utcnow)
+class Passenger(Base):
+    __tablename__ = "passengers"
+    
+    id = Column(Integer, primary_key= True, index= True)
+    name = Column (String, nullable= False)
+    email= Column(String, unique= True,index=True, nullable=False)
+    flight_id = Column(Integer, ForeignKey("flights.id"), nullable= False)
+    flight = relationship("Flight", back_populates="passengers")

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -15,6 +15,10 @@ class FlightCreate(BaseModel):
     departure_time: datetime
     arrival_time: datetime
     base_price: float
+class PassengerCreate(BaseModel):
+    name : str
+    email : str
+    flight_id : int 
 
 @router.post("/")
 def create_flights(flight:FlightCreate, db:Session= Depends(get_db) ):
@@ -60,3 +64,23 @@ def update_flight (flight_id: int,flight:FlightCreate,db: Session = Depends(get_
     db.commit()
     db.refresh(db_flight)
     return {"message": "Flight Updated Successfully!", "data": db_flight}
+
+@router.post("/passengers/")
+def create_passenger(passenger: PassengerCreate, db: Session = Depends(get_db)):
+    new_passenger = models.Passenger(
+        name = passenger.name,
+        email = passenger.email,
+        flight_id = passenger.flight_id
+    )
+    db.add(new_passenger)
+    db.commit()
+    db.refresh(new_passenger)
+    return {"message": "Passenger booked successfully!", "data": new_passenger}
+   
+@router.get("/passengers/{passenger_id}")
+def get_single_passenger(passenger_id: int, db: Session = Depends(get_db)):
+    single_passengers = db.query(models.Passenger).filter(models.Passenger.id == passenger_id).first()
+    if single_passengers is None:
+        raise HTTPException (status_code= status.HTTP_404_NOT_FOUND, detail= "Not found")
+    return {"status": "success", "data": single_passengers}
+
