@@ -20,6 +20,24 @@ class PassengerCreate(BaseModel):
     email : str
     flight_id : int 
 
+class FlightResponse(BaseModel):
+    id: int
+    flight_number: str
+    origin: str
+    destination: str
+
+    class Config:
+        from_attributes = True  # Pydantic ke database model theke data nite bolche
+
+class PassengerResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    flight: FlightResponse  # Etai magic! Flight er details ekhane nested hoye jabe
+
+    class Config:
+        from_attributes = True
+
 @router.post("/")
 def create_flights(flight:FlightCreate, db:Session= Depends(get_db) ):
     new_flight = models.Flight(
@@ -77,10 +95,10 @@ def create_passenger(passenger: PassengerCreate, db: Session = Depends(get_db)):
     db.refresh(new_passenger)
     return {"message": "Passenger booked successfully!", "data": new_passenger}
    
-@router.get("/passengers/{passenger_id}")
+@router.get("/passengers/{passenger_id}",response_model = PassengerResponse)
 def get_single_passenger(passenger_id: int, db: Session = Depends(get_db)):
     single_passengers = db.query(models.Passenger).filter(models.Passenger.id == passenger_id).first()
     if single_passengers is None:
         raise HTTPException (status_code= status.HTTP_404_NOT_FOUND, detail= "Not found")
-    return {"status": "success", "data": single_passengers}
+    return single_passengers
 

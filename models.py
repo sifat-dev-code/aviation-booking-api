@@ -1,6 +1,6 @@
 from database import Base
 from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, ForeignKey
-import datetime
+from datetime import datetime
 from sqlalchemy.orm import relationship
 class User(Base):
     __tablename__ = "users"
@@ -27,15 +27,7 @@ class Seat (Base):
     seat_number = Column(String, nullable=False)
     class_type = Column (String, nullable= False)
     is_available= Column(Boolean, default= True)
-class Booking(Base):
-    __tablename__= "bookings"
-    id = Column(Integer, primary_key= True, index= True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable= False)
-    flight_id = Column (Integer, ForeignKey("flights.id"), nullable= False)
-    seat_id = Column(Integer, ForeignKey("seats.id"), nullable= False)
-    total_price = Column(Float, nullable= False)
-    payment_status= Column (String, default= "Pending..")
-    booking_time = Column(DateTime, default= datetime.datetime.utcnow)
+
 class Passenger(Base):
     __tablename__ = "passengers"
     
@@ -44,3 +36,14 @@ class Passenger(Base):
     email= Column(String, unique= True,index=True, nullable=False)
     flight_id = Column(Integer, ForeignKey("flights.id"), nullable= False)
     flight = relationship("Flight", back_populates="passengers")
+
+class Booking(Base):
+    __tablename__ = "bookings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    
+    flight_id = Column(Integer, ForeignKey("flights.id"))
+    passenger_id = Column(Integer, ForeignKey("passengers.id"))
+    
+    booking_date = Column(DateTime, default=datetime.now)
+    status = Column(String, default="Confirmed")
