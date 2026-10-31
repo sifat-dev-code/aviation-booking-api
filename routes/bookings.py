@@ -34,3 +34,7 @@ def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_booking)
     return {"message": "Ticket Booked Successfully!", "data": new_booking}
+@router.get("/")
+def get_all_bookings(db: Session = Depends(get_db)):
+    ticket = db.query(models.Booking).all()
+    return ticket
