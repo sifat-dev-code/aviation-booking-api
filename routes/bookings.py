@@ -12,6 +12,8 @@ router = APIRouter(
 class BookingCreate(BaseModel):
     flight_id: int
     passenger_id: int
+class BookingUpdate (BaseModel):
+    status: str
 
 @router.post("/")
 def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
@@ -42,7 +44,17 @@ def get_all_bookings(db: Session = Depends(get_db)):
 def delete_booking(booking_id: int, db: Session = Depends(get_db)):
     ticket = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if not ticket:
-        return {"error": "Flight not found!"}
+        return {"error": "Ticket not found!"}
     db.delete(ticket)
     db.commit()
     return {"message": "Ticket Cancelled Successfully!"}
+
+@router.put("/{booking_id}")
+def update_booking(booking_id: int, booking_data: BookingUpdate,db: Session = Depends(get_db)):
+    ticket = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+    if not ticket:
+        return {"error": "Ticket not found!"}
+    ticket.status = booking_data.status
+    db.commit()
+    db.refresh(ticket)
+    return {"message": "ticket Updated Successfully!"}
