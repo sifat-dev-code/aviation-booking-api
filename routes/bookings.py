@@ -40,7 +40,7 @@ def get_all_bookings(db: Session = Depends(get_db)):
     return ticket
 @router.delete("/{booking_id}")
 def delete_booking(booking_id: int, db: Session = Depends(get_db)):
-    ticket = db.query(models.Flight).filter(models.Flight.id == booking_id).first()
+    ticket = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if not ticket:
         return {"error": "Flight not found!"}
     db.delete(ticket)
