@@ -57,4 +57,4 @@ def update_booking(booking_id: int, booking_data: BookingUpdate,db: Session = De
     ticket.status = booking_data.status
     db.commit()
     db.refresh(ticket)
-    return {"message": "ticket Updated Successfully!"}
+    return {"message": "ticket Updated Successfully!","data": ticket}
