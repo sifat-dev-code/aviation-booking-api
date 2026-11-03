@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from database import get_db
 import models
+import auth
 router = APIRouter(
     prefix="/flights",
     tags=["Flights"]
@@ -39,7 +40,7 @@ class PassengerResponse(BaseModel):
         from_attributes = True
 
 @router.post("/")
-def create_flights(flight:FlightCreate, db:Session= Depends(get_db) ):
+def create_flights(flight: FlightCreate, db: Session = Depends(get_db), current_user: dict = Depends(auth.check_admin)):
     new_flight = models.Flight(
     flight_number=flight.flight_number,
     origin = flight.origin,
