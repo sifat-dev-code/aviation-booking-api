@@ -60,7 +60,7 @@ def get_flights(db: Session = Depends(get_db)):
     return {"status": "success", "data": flights}
 
 @router.delete("/{flight_id}")
-def delete_flight(flight_id: int, db: Session = Depends(get_db)):
+def delete_flight(flight_id: int, db: Session = Depends(get_db),current_user: dict = Depends(auth.check_admin)):
     flight = db.query(models.Flight).filter(models.Flight.id == flight_id).first()
     if not flight:
         return {"error": "Flight not found!"}
@@ -70,7 +70,7 @@ def delete_flight(flight_id: int, db: Session = Depends(get_db)):
     return {"message": f"Flight {flight_id} deleted successfully!"}
 
 @router.put("/{flight_id}")
-def update_flight (flight_id: int,flight:FlightCreate,db: Session = Depends(get_db)):
+def update_flight (flight_id: int,flight:FlightCreate,db: Session = Depends(get_db),current_user: dict = Depends(auth.check_admin)):
     db_flight = db.query(models.Flight).filter(models.Flight.id == flight_id).first()
     if not db_flight:
         return {"error": "Flight not found"}
@@ -85,7 +85,7 @@ def update_flight (flight_id: int,flight:FlightCreate,db: Session = Depends(get_
     return {"message": "Flight Updated Successfully!", "data": db_flight}
 
 @router.post("/passengers/")
-def create_passenger(passenger: PassengerCreate, db: Session = Depends(get_db)):
+def create_passenger(passenger: PassengerCreate, db: Session = Depends(get_db),current_user: dict = Depends(auth.check_passenger)):
     new_passenger = models.Passenger(
         name = passenger.name,
         email = passenger.email,
@@ -97,7 +97,7 @@ def create_passenger(passenger: PassengerCreate, db: Session = Depends(get_db)):
     return {"message": "Passenger booked successfully!", "data": new_passenger}
    
 @router.get("/passengers/{passenger_id}",response_model = PassengerResponse)
-def get_single_passenger(passenger_id: int, db: Session = Depends(get_db)):
+def get_single_passenger(passenger_id: int, db: Session = Depends(get_db),current_user: dict = Depends(auth.check_admin)):
     single_passengers = db.query(models.Passenger).filter(models.Passenger.id == passenger_id).first()
     if single_passengers is None:
         raise HTTPException (status_code= status.HTTP_404_NOT_FOUND, detail= "Not found")

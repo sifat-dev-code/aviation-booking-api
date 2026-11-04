@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import models
+import models, auth
 from database import get_db
 
 router = APIRouter(
@@ -16,7 +16,7 @@ class BookingUpdate (BaseModel):
     status: str
 
 @router.post("/")
-def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
+def create_booking(booking: BookingCreate, db: Session = Depends(get_db),current_user: dict = Depends(auth.check_passenger)):
     
     flight = db.query(models.Flight).filter(models.Flight.id == booking.flight_id).first()
     if not flight:
@@ -41,7 +41,7 @@ def get_all_bookings(db: Session = Depends(get_db)):
     ticket = db.query(models.Booking).all()
     return ticket
 @router.delete("/{booking_id}")
-def delete_booking(booking_id: int, db: Session = Depends(get_db)):
+def delete_booking(booking_id: int, db: Session = Depends(get_db),current_user: dict = Depends(auth.check_admin)):
     ticket = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if not ticket:
         return {"error": "Ticket not found!"}
@@ -50,7 +50,7 @@ def delete_booking(booking_id: int, db: Session = Depends(get_db)):
     return {"message": "Ticket Cancelled Successfully!"}
 
 @router.put("/{booking_id}")
-def update_booking(booking_id: int, booking_data: BookingUpdate,db: Session = Depends(get_db)):
+def update_booking(booking_id: int, booking_data: BookingUpdate,db: Session = Depends(get_db),current_user: dict = Depends(auth.check_admin)):
     ticket = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if not ticket:
         return {"error": "Ticket not found!"}

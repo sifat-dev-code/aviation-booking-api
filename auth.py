@@ -35,8 +35,14 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
      
-def check_admin(payload: dict = Depends(get_current_user)):
+def check_admin(payload: dict = Depends(get_current_user), token: str = Depends(oauth2_scheme)):
     role = payload.get("role")
     if role != "Admin":
         raise HTTPException(status_code=403, detail="You are not an admin! Only admins can do this.")
+    return payload
+
+def check_passenger(payload: dict = Depends(get_current_user), token: str = Depends(oauth2_scheme)):
+    role = payload.get("role")
+    if role != "Passenger":
+        raise HTTPException(status_code=403, detail="Only passengers can book flights!")
     return payload
